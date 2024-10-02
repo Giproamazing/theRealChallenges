@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2 Players to Continue</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            text-align: center;
+        }
+        #progress-container {
+            width: 100%;
+            background-color: #555;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            height: 30px;
+            position: relative;
+            overflow: hidden; /* Ensures the progress bar stays within bounds */
+        }
+        #progress-bar {
+            height: 100%;
+            background-color: green;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out; /* Smooth transition */
+            width: 0; /* Start with 0 width */
+        }
+        #click-button {
+            background-color: white;
+            color: black;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: none; /* Initially hidden until two clicks */
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <p>2 players need to type the secret word to continue</p>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <p id="progress-text">0/2</p> <!-- Display progress -->
+        <button id="click-to-continue">Click to continue</button>
+        <button id="click-button">Next</button>
+    </div>
+
+    <script>
+        const encodedWord = "bGFib25lYQ=="; // Base64 encoded word "labonea"
+        const requiredWord = atob(encodedWord); // Decode the word
+        let clickCount = parseInt(localStorage.getItem('clickCount')) || 0; // Initialize click count from localStorage
+        const clickedUsers = new Set(JSON.parse(localStorage.getItem('clickedUsers')) || []); // Load clicked users from localStorage
+
+        // Function to update the UI based on current state
+        function updateUI() {
+            const progressText = document.getElementById('progress-text');
+            const progressBar = document.getElementById('progress-bar');
+            
+            progressText.textContent = `${clickCount}/2`; // Update text
+            const percentage = (clickCount / 2) * 100; // Calculate percentage
+            progressBar.style.width = percentage + '%'; // Update progress bar width
+
+            // Show next button if the count is 2
+            if (clickCount >= 2) {
+                document.getElementById('click-button').style.display = 'block';
+            }
+        }
+
+        // Function to handle clicks
+        function handleClick() {
+            const userInput = prompt("Type the secret word to continue:");
+            if (userInput !== requiredWord) {
+                alert(`Incorrect! Please type the secret word to proceed.`);
+                return; // Exit if the input doesn't match
+            }
+
+            // Check if the user has already clicked
+            if (clickedUsers.has(userInput)) {
+                alert("You can only click once!");
+                return; // Exit if user has clicked
+            }
+
+            // Record the user's click
+            clickedUsers.add(userInput);
+            clickCount++;
+            localStorage.setItem('clickCount', clickCount); // Save click count in localStorage
+            localStorage.setItem('clickedUsers', JSON.stringify([...clickedUsers])); // Save clicked users in localStorage
+            updateUI(); // Update UI
+        }
+
+        // Event listener for the click button
+        document.getElementById('click-to-continue').addEventListener('click', handleClick);
+
+        // Event listener for the next button
+        document.getElementById('click-button').addEventListener('click', () => {
+            alert('Moving to the next step!'); // This can be modified to redirect to another page
+            // window.location.href = 'next_page.html';  // Uncomment to redirect to another page
+        });
+
+        // Update the UI on initial load
+        updateUI();
+    </script>
+</body>
+</html>
